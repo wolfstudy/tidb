@@ -41,41 +41,41 @@ const (
 	codeErXBadMessage                terror.ErrCode = terror.ErrCode(mysql.ErXBadMessage)
 	codeErXAccessDenied                             = terror.ErrCode(mysql.ErrAccessDenied)
 	codeErXBadSchema                                = terror.ErrCode(mysql.ErXBadSchema)
-	codeErXBadTable                                 = terror.ErrCode(mysql.ErXBadTable)
-	codeErrTableExists                              = terror.ErrCode(mysql.ErrTableExists)
-	codeErXInvalidCollection                        = terror.ErrCode(mysql.ErXInvalidCollection)
-	codeErrJSONUsedAsKey                            = terror.ErrCode(mysql.ErrJSONUsedAsKey)
-	codeErXBadNotice                                = terror.ErrCode(mysql.ErXBadNotice)
-	codeErXCapabilitiesPrepareFailed                = terror.ErrCode(mysql.ErXCapabilitiesPrepareFailed)
-	codeErXBadProjection                            = terror.ErrCode(mysql.ErXBadProjection)
-	codeErXBadInsertData                            = terror.ErrCode(mysql.ErXBadInsertData)
-	codeErXExprMissingArg                           = terror.ErrCode(mysql.ErXExprMissingArg)
-	codeErXInvalidNamespace                         = terror.ErrCode(mysql.ErXInvalidNamespace)
-	codeErXInvalidAdminCommand                      = terror.ErrCode(mysql.ErXInvalidAdminCommand)
-	codeErXCmdNumArguments                          = terror.ErrCode(mysql.ErXCmdNumArguments)
-	codeErXCmdArgumentType                          = terror.ErrCode(mysql.ErXCmdArgumentType)
-	codeErXCannotDisableNotice                      = terror.ErrCode(mysql.ErXCannotDisableNotice)
+	codeErXBadTable                  = terror.ErrCode(mysql.ErXBadTable)
+	codeErrTableExists               = terror.ErrCode(mysql.ErrTableExists)
+	codeErXInvalidCollection         = terror.ErrCode(mysql.ErXInvalidCollection)
+	codeErrJSONUsedAsKey             = terror.ErrCode(mysql.ErrJSONUsedAsKey)
+	codeErXBadNotice                 = terror.ErrCode(mysql.ErXBadNotice)
+	codeErXCapabilitiesPrepareFailed = terror.ErrCode(mysql.ErXCapabilitiesPrepareFailed)
+	CodeErXBadProjection             = terror.ErrCode(mysql.ErXBadProjection)
+	CodeErXBadInsertData             = terror.ErrCode(mysql.ErXBadInsertData)
+	CodeErXExprMissingArg            = terror.ErrCode(mysql.ErXExprMissingArg)
+	codeErXInvalidNamespace          = terror.ErrCode(mysql.ErXInvalidNamespace)
+	codeErXInvalidAdminCommand       = terror.ErrCode(mysql.ErXInvalidAdminCommand)
+	codeErXCmdNumArguments           = terror.ErrCode(mysql.ErXCmdNumArguments)
+	codeErXCmdArgumentType           = terror.ErrCode(mysql.ErXCmdArgumentType)
+	codeErXCannotDisableNotice       = terror.ErrCode(mysql.ErXCannotDisableNotice)
 )
 
 func init() {
 	xProtocolMySQLErrCodes := map[terror.ErrCode]uint16{
 		codeErXBadMessage:                mysql.ErXBadMessage,
 		codeErXCapabilitiesPrepareFailed: mysql.ErXCapabilitiesPrepareFailed,
-		codeErXAccessDenied:              mysql.ErrAccessDenied,
-		codeErXBadSchema:                 mysql.ErXBadSchema,
-		codeErXBadTable:                  mysql.ErXBadTable,
-		codeErrTableExists:               mysql.ErrTableExists,
-		codeErXInvalidCollection:         mysql.ErXInvalidCollection,
-		codeErrJSONUsedAsKey:             mysql.ErrJSONUsedAsKey,
-		codeErXBadNotice:                 mysql.ErXBadNotice,
-		codeErXBadProjection:             mysql.ErXBadProjection,
-		codeErXBadInsertData:             mysql.ErXBadInsertData,
-		codeErXExprMissingArg:            mysql.ErXExprMissingArg,
-		codeErXInvalidNamespace:          mysql.ErXInvalidNamespace,
-		codeErXInvalidAdminCommand:       mysql.ErXInvalidAdminCommand,
-		codeErXCmdNumArguments:           mysql.ErXCmdNumArguments,
-		codeErXCmdArgumentType:           mysql.ErXCmdArgumentType,
-		codeErXCannotDisableNotice:       mysql.ErXCannotDisableNotice,
+		codeErXAccessDenied:        mysql.ErrAccessDenied,
+		codeErXBadSchema:           mysql.ErXBadSchema,
+		codeErXBadTable:            mysql.ErXBadTable,
+		codeErrTableExists:         mysql.ErrTableExists,
+		codeErXInvalidCollection:   mysql.ErXInvalidCollection,
+		codeErrJSONUsedAsKey:       mysql.ErrJSONUsedAsKey,
+		codeErXBadNotice:           mysql.ErXBadNotice,
+		CodeErXBadProjection:       mysql.ErXBadProjection,
+		CodeErXBadInsertData:       mysql.ErXBadInsertData,
+		CodeErXExprMissingArg:      mysql.ErXExprMissingArg,
+		codeErXInvalidNamespace:    mysql.ErXInvalidNamespace,
+		codeErXInvalidAdminCommand: mysql.ErXInvalidAdminCommand,
+		codeErXCmdNumArguments:     mysql.ErXCmdNumArguments,
+		codeErXCmdArgumentType:     mysql.ErXCmdArgumentType,
+		codeErXCannotDisableNotice: mysql.ErXCannotDisableNotice,
 	}
 	terror.ErrClassToMySQLCodes[terror.ClassXProtocol] = xProtocolMySQLErrCodes
 }
