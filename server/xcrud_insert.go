@@ -107,7 +107,7 @@ func (ib *insertBuilder)addRow(row *Mysqlx_Crud.Insert_TypedRow, projectionSize 
 	target += *generatedField
 	for _, field := range row.GetField()[1:] {
 		target += ","
-		generatedField, err := expr.AddExpr(field)
+		generatedField, err = expr.AddExpr(field)
 		if err != nil {
 			return nil, err
 		}

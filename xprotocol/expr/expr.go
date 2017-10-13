@@ -42,20 +42,6 @@ func (e *expr)generate() (*string, error) {
 	return generator.generate()
 }
 
-func AddExpr(e interface{}) (*string, error) {
-	var generator generator
-
-	switch e.(type) {
-	case *Mysqlx_Expr.Expr:
-		generator = &expr{e.(*Mysqlx_Expr.Expr)}
-	case []*Mysqlx_Expr.DocumentPathItem:
-		generator = &docPathArray{e.([]*Mysqlx_Expr.DocumentPathItem)}
-	default:
-		return nil, util.ErXBadMessage
-	}
-	return generator.generate()
-}
-
 type ident struct {
 	identifier *Mysqlx_Expr.ColumnIdentifier
 }
@@ -103,7 +89,7 @@ func (i *ident) generate() (*string, error) {
 		target += ","
 		generatedQuery, err := AddExpr(docPath)
 		if err != nil {
-			return nil, nil
+			return nil, err
 		}
 		target += *generatedQuery
 		target += ")"
@@ -201,4 +187,18 @@ func (d *docPathArray) generate() (*string, error) {
 
 	target += "\\"
 	return &target, nil
+}
+
+func AddExpr(e interface{}) (*string, error) {
+	var generator generator
+
+	switch e.(type) {
+	case *Mysqlx_Expr.Expr:
+		generator = &expr{e.(*Mysqlx_Expr.Expr)}
+	case []*Mysqlx_Expr.DocumentPathItem:
+		generator = &docPathArray{e.([]*Mysqlx_Expr.DocumentPathItem)}
+	default:
+		return nil, util.ErXBadMessage
+	}
+	return generator.generate()
 }
