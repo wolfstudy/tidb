@@ -4,6 +4,7 @@ import (
 	"github.com/pingcap/tipb/go-mysqlx/Expr"
 	"github.com/pingcap/tipb/go-mysqlx/Datatypes"
 	"github.com/pingcap/tidb/xprotocol/util"
+	"strconv"
 )
 
 type generator interface {
@@ -23,7 +24,7 @@ func (e *expr)generate(qb *queryBuilder) (*queryBuilder, error) {
 	case Mysqlx_Expr.Expr_IDENT:
 		generator = &ident{e.isRelation, expr.GetIdentifier()}
 	case Mysqlx_Expr.Expr_LITERAL:
-		generator = &literal{expr.GetLiteral()}
+		generator = &scalar{expr.GetLiteral()}
 	case Mysqlx_Expr.Expr_VARIABLE:
 		generator = &variable{expr.GetVariable()}
 	case Mysqlx_Expr.Expr_FUNC_CALL:
@@ -95,11 +96,11 @@ func (i *ident) generate(qb *queryBuilder) (*queryBuilder, error) {
 	return qb, nil
 }
 
-type literal struct{
-	literal *Mysqlx_Datatypes.Scalar
+type scalar struct{
+	scalar *Mysqlx_Datatypes.Scalar
 }
-func (l *literal) generate(qb *queryBuilder) (*queryBuilder, error) {
-	literal := l.literal
+func (l *scalar) generate(qb *queryBuilder) (*queryBuilder, error) {
+	literal := l.scalar
 	switch literal.GetType() {
 	case Mysqlx_Datatypes.Scalar_V_UINT:
 		return qb.put(literal.GetVUnsignedInt()), nil
@@ -117,7 +118,7 @@ func (l *literal) generate(qb *queryBuilder) (*queryBuilder, error) {
 		if literal.GetVString().GetCollation() != 0 {
 			//TODO: see line No. 231 in expr_generator.cc if the mysql's codes
 		}
-		return qb.put(util.QuoteString(string(literal.GetVString().GetValue()))), nil
+		return qb.QuoteString(string(literal.GetVString().GetValue())), nil
 	case Mysqlx_Datatypes.Scalar_V_DOUBLE:
 		return qb.put(literal.GetVDouble()), nil
 	case Mysqlx_Datatypes.Scalar_V_FLOAT:
@@ -217,6 +218,56 @@ func (d *docPathArray) generate(qb *queryBuilder) (*queryBuilder, error) {
 	return qb, nil
 }
 
+const (
+	ctPlain    = 0x0000 //   default value; general use of octets
+	ctGeometry = 0x0001 //   BYTES  0x0001 GEOMETRY (WKB encoding)
+	ctJson     = 0x0002 //   BYTES  0x0002 JSON (text encoding)
+	ctXml      = 0x0003 //   BYTES  0x0003 XML (text encoding)
+)
+
+type scalarOctets struct {
+	scalarOctets *Mysqlx_Datatypes.Scalar_Octets
+}
+
+func (so *scalarOctets) generate(qb *queryBuilder) (*queryBuilder, error) {
+	scalarOctets := so.scalarOctets
+	content := string(scalarOctets.GetValue())
+	switch scalarOctets.GetContentType() {
+	case ctPlain:
+		return qb.QuoteString(content), nil
+	case ctGeometry:
+		return qb.put("ST_GEOMETRYFROMWKB(").QuoteString(content).put(")"), nil
+	case ctJson:
+		return qb.put("CAST(").QuoteString(content).put(" AS JSON)") ,nil
+	case ctXml:
+		return qb.QuoteString(content), nil
+	default:
+		return nil, util.ErrorMessage(util.CodeErXExprBadTypeValue,
+			"Invalid content type for Mysqlx::Datatypes::Scalar::Octets " +
+				strconv.FormatUint(uint64(scalarOctets.GetContentType()), 10))
+	}
+}
+
+type any struct {
+	any *Mysqlx_Datatypes.Any
+}
+
+func (a *any) generate(qb *queryBuilder) (*queryBuilder, error) {
+	any := a.any
+	switch any.GetType() {
+	case Mysqlx_Datatypes.Any_SCALAR:
+		generatedQuery, err := AddExpr(any.GetScalar(), false)
+		if err != nil {
+			return nil, err
+		}
+		return qb.put(*generatedQuery), nil
+	default:
+		return nil, util.ErrorMessage(util.CodeErXExprBadTypeValue,
+			"Invalid value for Mysqlx::Datatypes::Any::Type " +
+				strconv.Itoa(int(any.GetType())))
+	}
+}
+
 func AddExpr(e interface{}, isRelation bool) (*string, error) {
 	var generator generator
 
@@ -225,6 +276,12 @@ func AddExpr(e interface{}, isRelation bool) (*string, error) {
 		generator = &expr{isRelation, e.(*Mysqlx_Expr.Expr)}
 	case []*Mysqlx_Expr.DocumentPathItem:
 		generator = &docPathArray{e.([]*Mysqlx_Expr.DocumentPathItem)}
+	case *Mysqlx_Datatypes.Any:
+		generator = &any{e.(*Mysqlx_Datatypes.Any)}
+	case *Mysqlx_Datatypes.Scalar:
+		generator = &scalar{e.(*Mysqlx_Datatypes.Scalar)}
+	case *Mysqlx_Datatypes.Scalar_Octets:
+		generator = &scalarOctets{e.(*Mysqlx_Datatypes.Scalar_Octets)}
 	default:
 		return nil, util.ErXBadMessage
 	}
